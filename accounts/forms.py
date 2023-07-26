@@ -17,3 +17,12 @@ class RegisterForm(forms.ModelForm):
             raise ValidationError('hasła nie są takie same')
         return cleaned_data
 
+
+class UserUpdateView(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'user_permissions']
+        widgets = {
+            'user_permissions': forms.CheckboxSelectMultiple()
+        }

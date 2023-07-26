@@ -3,10 +3,11 @@ from sqlite3 import IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView, UpdateView
 
-from accounts.forms import RegisterForm
+from accounts.forms import RegisterForm, UserUpdateView
 from movie_app.models import Person
 
 
@@ -54,5 +55,14 @@ class UserListView(ListView):
 
     model = User
     template_name = 'accounts/user_list.html'
+
+
+class UpdateUserView(UpdateView):
+    model = User
+    template_name = 'form2.html'
+    form_class = UserUpdateView
+
+    def get_success_url(self):
+        return reverse('update_user', kwargs={'pk':self.object.pk})
 
 

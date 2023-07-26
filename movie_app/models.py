@@ -58,4 +58,6 @@ class Comment(models.Model):
     text = models.TextField()
     date = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.movie} {self.text[:10]}"
 

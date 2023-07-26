@@ -21,7 +21,13 @@
     <h1>comments:</h1>
     <ul>
         {% for comment in movie.comment_set.all %}
-            <li><p>{{ comment.text }}</p><small>{{ comment.date }} {{ comment.creator }}</small></li>
+            <li><p>{{ comment.text }}</p><small>{{ comment.date }} {{ comment.creator }}
+                {% if user == comment.creator %}
+                <a href="{% url 'update_comment' comment.id %}">zmien</a>
+                {% endif %}
+            </small>
+
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}

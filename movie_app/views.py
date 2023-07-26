@@ -1,12 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, CreateView
 
 from movie_app.forms import AddPersonForm, AddProducderForm, AddMovieModelForm, SearchPersonForm, AddCommentToMovieForm
-from movie_app.models import Genre, Person, Producer, Movie
+from movie_app.models import Genre, Person, Producer, Movie, Comment
 
 
 class IndexView(View):
@@ -118,32 +118,38 @@ class ProducerListView(View):
         producers = Movie.objects.all()
         return render(request, 'producer_list.html', {'producers': producers})
 
+
 class ProducerDetailView(View):
 
     def get(self, request, id):
         producer = Producer.objects.get(pk=id)
-        return render(request, 'producer_detail.html', {'producer':producer})
+        return render(request, 'producer_detail.html', {'producer': producer})
 
 
 class ProducerGenericDetailView(DetailView):
     model = Producer
     template_name = 'producer_detail.html'
 
+
 class ProducerGenericUpdateView(UpdateView):
     model = Producer
     template_name = 'form2.html'
     fields = '__all__'
     success_url = reverse_lazy('detail_genreric_producer')
+
+
 class ProducerGenericCreateView(CreateView):
     model = Producer
     template_name = 'form2.html'
     fields = '__all__'
     success_url = reverse_lazy('detail_genreric_producer')
+
+
 class ProducerGenericListView(ListView):
     model = Producer
     template_name = 'producer_list.html'
 
-    def get_context_data(self, *, object_list=None, **kwargs): #przykład jak rozszerzyć kontekst o dodatkowe zmienne
+    def get_context_data(self, *, object_list=None, **kwargs):  # przykład jak rozszerzyć kontekst o dodatkowe zmienne
         context = super().get_context_data(object_list=object_list, **kwargs)
         context['msg'] = "boli mnie bark"
         return context
@@ -153,14 +159,14 @@ class PersonDetailView(View):
 
     def get(self, request, id):
         person = Person.objects.get(pk=id)
-        return render(request, 'person_detail.html', {'person':person, 'dupa':'ala ma kota'})
+        return render(request, 'person_detail.html', {'person': person, 'dupa': 'ala ma kota'})
 
 
 class MovieDetailView(View):
 
     def get(self, request, id):
         movie = Movie.objects.get(pk=id)
-        return render(request, 'movie_detail.html', {'movie':movie})
+        return render(request, 'movie_detail.html', {'movie': movie})
 
 
 class GenreDetailView(PermissionRequiredMixin, View):
@@ -168,14 +174,14 @@ class GenreDetailView(PermissionRequiredMixin, View):
 
     def get(self, request, id):
         genre = Genre.objects.get(pk=id)
-        return render(request, 'genre_detail.html', {'genre':genre})
+        return render(request, 'genre_detail.html', {'genre': genre})
 
 
 class AddCommentToMovieView(LoginRequiredMixin, View):
 
     def get(self, request, id_movie):
         form = AddCommentToMovieForm()
-        return render(request, 'form2.html', {'form':form})
+        return render(request, 'form2.html', {'form': form})
 
     def post(self, request, id_movie):
         form = AddCommentToMovieForm(request.POST)
@@ -186,3 +192,17 @@ class AddCommentToMovieView(LoginRequiredMixin, View):
             comment.save()
             return redirect('detail_movie', id_movie)
         return render(request, 'form2.html', {'form': form})
+
+
+class UpdateCommentView(UserPassesTestMixin, UpdateView):
+    model = Comment
+    template_name = 'form2.html'
+    fields = ['text']
+
+    def test_func(self):
+        pk = self.kwargs['pk']
+        comment = Comment.objects.get(pk=pk)
+        return comment.creator == self.request.user
+
+    def get_success_url(self):
+        return reverse('detail_movie', kwargs={'id': self.object.movie.pk})

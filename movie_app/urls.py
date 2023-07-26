@@ -38,5 +38,6 @@ urlpatterns = [
     path('listGenericProducer', views.ProducerGenericListView.as_view(), name='list_producer'),
     path('updateGenericProducer/<int:pk>/', views.ProducerGenericUpdateView.as_view(), name='update_producer'),
     path('createGenreicProducer/', views.ProducerGenericCreateView.as_view(), name='create_producer'),
+    path('comment/<int:pk>/', views.UpdateCommentView.as_view(), name='update_comment')
 
 ]

@@ -14,7 +14,6 @@ class IndexView(View):
     def get(self, request):
         return render(request, 'base.html')
 
-
 # Create your views here.
 
 class AddGenreView(View):
